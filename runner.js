@@ -1,31 +1,13 @@
-const Docker = require("dockerode");
 Promise = require("bluebird");
 const path = require("path");
-let docker = Promise.promisifyAll(new Docker());
-const {runCommand} = require("./runner_util");
-let image;
-
+const {runCommand} = require("./runner/runner_util");
+const getContainer = require("./runner/container");
 async function main() {
 	let container;
 	let dir = path.resolve(process.cwd());
 	try {
-		container = await docker.createContainerAsync({
-			Image: "gcc:latest",
-			Cmd: ["/bin/sh", "-c", "while true; do sleep 1; done;"],
-			HostConfig: {
-				NetworkMode: "none",
-				Memory: 256 * 1024 * 1024,
-				Binds: [`${dir}:/opt:rw`],
-				CpusetCpus: "1"
-			},
-			WorkingDir: "/opt",
-			Volumes: {
-				"/opt": {}
-			},
-			NetworkDisabled: true
-		});
+		container = await getContainer("gcc:latest", dir);
 		Promise.promisifyAll(container);
-
 		const containerStream = await container.attachAsync({stream: true, stdout: true, stderr: true});
 		await container.startAsync();
 		containerStream.pipe(process.stdout);

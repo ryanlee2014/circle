@@ -1,7 +1,7 @@
 const Docker = require("dockerode");
 Promise = require("bluebird");
 let docker = Promise.promisifyAll(new Docker());
-const {runCommand} = require("../../runner_util");
+const {runCommand} = require("../../runner/runner_util");
 const path = require("path");
 
 async function main(dir, fileName, fileSuffix = "cc", version = 17, language = "g++") {
